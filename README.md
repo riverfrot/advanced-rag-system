@@ -29,3 +29,15 @@ OPENAI_API_KEY=your_openai_api_key
 TAVILY_API_KEY=your_tavily_api_key
 CHROMA_PERSIST_DIRECTORY=./chroma_db
 ```
+
+### 3. 실행 명령어 예시 
+예시:
+  # Repository Crawling
+  python main.py crawling --repo https://github.com/riverfrot/sample-spring
+  
+  # Issue resolution
+  python main.py query --issue "ISSUE-2: 데이터 영속성 문제"
+  
+  # Custom persist directory
+  python main.py crawling --repo https://github.com/riverfrot/sample-spring --persist-dir ./custom_db
+  python main.py query --issue "Spring Boot database issue" --persist-dir ./custom_db
