@@ -1,0 +1,18 @@
+openai>=1.0.0
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-openai>=0.0.5
+python-dotenv>=1.0.0
+#vetctoDB 라이브러리 시작
+chromadb>=0.4.0
+pinecone-client>=2.2.0
+#vetctoDB 라이브러리 끝
+GitPython>=3.1.0
+tavily-python>=0.3.0
+requests>=2.28.0
+tiktoken>=0.5.0
+numpy>=1.24.0
+rank-bm25>=0.2.2
+sentence-transformers>=2.2.0
+scikit-learn>=1.3.0
+langchain-experimental>=0.0.40
