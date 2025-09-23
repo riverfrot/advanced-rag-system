@@ -55,7 +55,22 @@ class IssueQuerySystem:
 
 
 def main():
-    return
+    parser = argparse.ArgumentParser(description="Issue Resolve Parser")
+    parser.add_argument(
+        "--issue", required=True, help="Issue description or issue number save to me"
+    )
+    parser.add_argument(
+        "--persist-dir",
+        help="if you need to cetain chromDB check this option",
+        default="./chroma_db",
+    )
+
+    args = parser.parse_args()
+
+    if args.persist_dir:
+        os.environ["CHROMA_PERSIST_DIRECTORY"] = args.persist_dir
+
+    query_system = IssueQuerySystem()
 
 
 if __name__ == "__main__":

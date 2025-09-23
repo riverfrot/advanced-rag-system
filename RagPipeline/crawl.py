@@ -209,7 +209,9 @@ def main():
     parser = argparse.ArgumentParser(description="Repository Crawling Pipeline")
     parser.add_argument("--repo", required=True, help="Repository URL to ingest")
     parser.add_argument(
-        "--persist-dir", help="ChromaDB persist directory", default="./chroma_db"
+        "--persist-dir",
+        help="if you need to cetain chromDB check this option",
+        default="./chroma_db",
     )
 
     args = parser.parse_args()
