@@ -9,8 +9,8 @@ Git Repo 를 기준으로 RAG 시스템을 구축 추후 멀티 agent 시스템�
 Repository → Ingestion → Chunking → Embedding → VectorStore
                                                       ↓
 User Query → Vector Search → Context Retrieval → LLM → Response
-                ↓
-         External Research (Tavily API)
+        ↓
+ External Research (Tavily API)
 ```
 
 ## 설치 및 설정
@@ -40,4 +40,4 @@ CHROMA_PERSIST_DIRECTORY=./chroma_db
   
   # Custom persist directory
   python main.py crawling --repo https://github.com/riverfrot/sample-spring --persist-dir ./custom_db
-  python main.py query --issue "Spring Boot database issue" --persist-dir ./custom_db
+  python main.py query --issue "ISSUE-2: 데이터 영속성 문제" --persist-dir ./custom_db

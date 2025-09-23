@@ -91,6 +91,11 @@ def main():
 
         try:
             query_system = IssueQuerySystem()
+            result = query_system.resolve_issue(args.issue)
+            
+            # 리포트 생성 및 저장
+            query_system.print_resolution_report(result)
+            print(f"Issue resolution completed successfully!")
 
         except Exception as e:
             print(f"Query failed: {e}")
