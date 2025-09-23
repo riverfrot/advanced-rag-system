@@ -9,8 +9,8 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from rag_pipeline.crawl import RepositoryCrawler
-from rag_pipeline.query import IssueQuerySystem
+from RagPipeline.crawl import RepositoryCrawler
+from RagPipeline.query import IssueQuerySystem
 
 
 def main():
@@ -72,11 +72,12 @@ def main():
     # 환경 변수 설정
     os.environ["CHROMA_PERSIST_DIRECTORY"] = args.persist_dir
 
-    if args.command == "crawl":
+    if args.command == "crawling":
         print("Start Repository Crawling...")
 
         try:
             crawler = RepositoryCrawler()
+            crawler.crawl_repository(args.repo)
 
             print("Crawling completed successfully!")
             print(f"Vector database saved to: {args.persist_dir}")
@@ -90,6 +91,11 @@ def main():
 
         try:
             query_system = IssueQuerySystem()
+            result = query_system.resolve_issue(args.issue)
+            
+            # 리포트 생성 및 저장
+            query_system.print_resolution_report(result)
+            print(f"Issue resolution completed successfully!")
 
         except Exception as e:
             print(f"Query failed: {e}")

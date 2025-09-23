@@ -3,3 +3,10 @@
 
 # 환경변수
 .env
+
+#pyhon 캐시
+__pycache__/
+
+#작업중 발생한 폴더들
+custom_db/
+temp_repo/
