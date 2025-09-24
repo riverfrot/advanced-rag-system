@@ -41,3 +41,17 @@ CHROMA_PERSIST_DIRECTORY=./chroma_db
   # Custom persist directory
   python main.py crawling --repo https://github.com/riverfrot/sample-spring --persist-dir ./custom_db
   python main.py query --issue "ISSUE-2: 데이터 영속성 문제" --persist-dir ./custom_db
+
+  ## Roadmap
+
+**TODO:**
+- [ ] Vector Database 성능 최적화 (Pinecone/Chroma)
+- [ ] Memory 관리 및 conversation chain 고도화
+- [ ] Error handling 및 retry 로직 추가
+- [ ] API 응답 시간 모니터링 추가
+- [ ] FastMCP를 사용하여 MCP 서버로 전환 예정
+- [ ] 멀티 에이전트 서비스들을 통해 해당 MCP서버를 tool로서 사용 가능하게끔 고도화
+
+## 라이선스
+
+MIT License
