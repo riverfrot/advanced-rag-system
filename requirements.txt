@@ -1,3 +1,6 @@
+# FastMCP for MCP server framework
+fastmcp>=0.1.0
+# LLM and RAG libraries
 openai>=1.0.0
 langchain>=0.1.0
 langchain-community>=0.0.20

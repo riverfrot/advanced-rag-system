@@ -9,8 +9,8 @@ Git Repo 를 기준으로 RAG 시스템을 구축 추후 멀티 agent 시스템�
 Repository → Ingestion → Chunking → Embedding → VectorStore
                                                       ↓
 User Query → Vector Search → Context Retrieval → LLM → Response
-                ↓
-         External Research (Tavily API)
+        ↓
+ External Research (Tavily API)
 ```
 
 ## 설치 및 설정
@@ -29,3 +29,27 @@ OPENAI_API_KEY=your_openai_api_key
 TAVILY_API_KEY=your_tavily_api_key
 CHROMA_PERSIST_DIRECTORY=./chroma_db
 ```
+
+### 3. 실행 명령어 예시 
+예시:
+  # Repository Crawling
+  python main.py crawling --repo https://github.com/riverfrot/sample-spring
+  
+  # Issue resolution
+  python main.py query --issue "ISSUE-2: 데이터 영속성 문제"
+  
+  # Custom persist directory
+  python main.py crawling --repo https://github.com/riverfrot/sample-spring --persist-dir ./custom_db
+  python main.py query --issue "ISSUE-2: 데이터 영속성 문제" --persist-dir ./custom_db
+
+**TODO:**
+- [ ] Vector Database 성능 최적화 (Pinecone/Chroma)
+- [ ] Memory 관리 및 conversation chain 고도화
+- [ ] Error handling 및 retry 로직 추가
+- [ ] API 응답 시간 모니터링 추가
+- [ ] FastMCP를 사용하여 MCP 서버로 전환 예정
+- [ ] 멀티 에이전트 서비스들을 통해 해당 MCP서버를 tool로서 사용 가능하게끔 고도화
+
+## 라이선스
+
+MIT License

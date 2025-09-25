@@ -1,0 +1,236 @@
+"""
+Repository Crawling Pipeline
+Repo 클론 후 코드 파일 수집 → 청킹 & 임베딩 → VectorStore 저장
+"""
+
+import os
+import sys
+import git
+import argparse
+from pathlib import Path
+from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+import openai
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_openai.embeddings import OpenAIEmbeddings
+from domain.entities.repository import RepositoryMetadata
+import chromadb
+
+load_dotenv()
+
+# LangSmith 추적 활성화
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+if os.getenv("LANGCHAIN_API_KEY"):
+    os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "rag-system")
+
+
+class RepositoryClass:
+    def __init__(self):
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        if not self.openai_api_key:
+            raise ValueError("OPENAI_API_KEY not found in environment variables")
+
+        # OpenAI text-embedding-3-small 사용
+        self.embeddings = OpenAIEmbeddings(
+            model="text-embedding-3-small", api_key=self.openai_api_key
+        )
+
+        # 텍스트 스플리터 설정 (코드에 최적화??)
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            separators=["\n\n", "\n", " ", ""],
+            length_function=len,
+        )
+
+        self.chroma_persist_dir = os.getenv("CHROMA_PERSIST_DIRECTORY", "./chroma_db")
+
+    def clone_repository(
+        self,
+        repositoryMetadata: RepositoryMetadata,
+        repo_url: str,
+        local_path: str = "./temp_repo",
+    ) -> str:
+        """GitHub 레포지토리 클론"""
+        print(f"Cloning repository: {repositoryMetadata.url}")
+
+        # 기존 디렉토리가 있다면 삭제
+        if os.path.exists(local_path):
+            import shutil
+
+            shutil.rmtree(local_path)
+
+        try:
+            git.Repo.clone_from(repo_url, local_path)
+            print(f"Repository cloned to: {local_path}")
+            return local_path
+        except Exception as e:
+            print(f"Error cloning repository: {e}")
+            raise
+
+    def extract_code_files(self, repositoryMetadata: RepositoryMetadata) -> List[str]:
+        """코드 파일 추출 기능 함수
+
+        현재는 (.kt, .java, .md 등) 파일들만 존재하지만 추후
+        (.ts,.js,.py,package.json..) 등 범용적으로 사용 할 수 있게끔 구조 변경해야함...
+        """
+        print(f"Extracting code files from: {repositoryMetadata.url}")
+
+        # 지원하는 파일 확장자
+        code_extensions = {
+            ".kt",
+            ".java",
+            ".py",
+            ".js",
+            ".ts",
+            ".md",
+            ".txt",
+            ".yml",
+            ".yaml",
+            ".json",
+            ".xml",
+            ".gradle",
+            ".properties",
+        }
+
+        files = []
+        ignored_dirs = {
+            ".git",
+            "node_modules",
+            "__pycache__",
+            ".gradle",
+            "build",
+            "target",
+        }
+
+        for root, dirs, filenames in os.walk(repositoryMetadata.url):
+            # 무시할 디렉토리 제외
+            dirs[:] = [
+                d for d in dirs if d not in ignored_dirs and not d.startswith(".")
+            ]
+
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                file_ext = Path(filename).suffix.lower()
+
+                if file_ext in code_extensions:
+                    files.append(file_path)
+
+        return files
+
+    def process_files_to_chunks(self, file_paths: List[str]) -> List[Dict[str, Any]]:
+        """파일을 청크로 분할하고 메타데이터 추가"""
+        print(f"Processing {len(file_paths)} files into chunks...")
+
+        documents = []
+
+        for file_path in file_paths:
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+
+                if not content.strip():
+                    continue
+
+                # 파일 내용을 청크로 분할
+                print(f"원문 확인 {content}")
+                chunks = self.text_splitter.split_text(content)
+                print(f"청크데이터 확인 {chunks}")
+                for i, chunk in enumerate(chunks):
+                    documents.append(
+                        {
+                            "content": chunk,
+                            "metadata": {
+                                "source": file_path,
+                                "chunk_index": i,
+                                "total_chunks": len(chunks),
+                                "file_type": Path(file_path).suffix,
+                                "file_name": Path(file_path).name,
+                                "relative_path": str(
+                                    Path(file_path).relative_to(
+                                        Path(file_path).parts[0]
+                                    )
+                                ),
+                            },
+                        }
+                    )
+
+            except Exception as e:
+                print(f"Error processing {file_path}: {e}")
+                continue
+
+        print(f"{len(documents)} document chunks 생성완료")
+        return documents
+
+    def create_vector_store(self, documents: List[Dict[str, Any]]) -> None:
+        """ChromaDB 벡터스토어 생성 및 저장
+
+        추후 ChromaDB 뿐만아니라 다른 vectorDB도 범용적으로 사용 가능하게끔 변경 필요
+        Faiss, Pinecone 등...
+        """
+        print(f"Creating vector store with {len(documents)} chunks...")
+
+        # 텍스트와 메타데이터 분리
+        texts = [doc["content"] for doc in documents]
+        metadatas = [doc["metadata"] for doc in documents]
+
+        # ChromaDB 벡터스토어 생성
+        vectorstore = Chroma.from_texts(
+            texts=texts,
+            metadatas=metadatas,
+            embedding=self.embeddings,
+            persist_directory=self.chroma_persist_dir,
+        )
+
+        # 벡터스토어 저장
+        vectorstore.persist()
+        print(f"Vector store created and saved to: {self.chroma_persist_dir}")
+
+    def create_crawl_repository(self, repo_url: str) -> None:
+        """전체 crawling 파이프라인 실행
+
+        음... 현재는 일단 main 브랜치 기준인데 다른 브랜치 타겟으로 하려면 어떻게해야하지,
+        추후 main 브랜치가 업데이트되면..? 전체다 다시 crawl해야하나"""
+        print("Starting repository crawling pipeline...")
+
+        try:
+            # 1. 레포지토리 클론
+            repo_path = self.clone_repository(repo_url)
+
+            # 2. 코드 파일 추출
+            file_paths = self.extract_code_files(repo_path)
+
+            # 3. 파일을 청크로 분할
+            documents = self.process_files_to_chunks(file_paths)
+
+            # 4. 벡터스토어 생성
+            self.create_vector_store(documents)
+
+        except Exception as e:
+            print(f"crawling failed: {e}")
+            sys.exit(1)
+
+    def update_repository_structure(
+        self, repositoryMetadata: RepositoryMetadata
+    ) -> dict:
+        """기존 crawling한 repositoy 구조 분석 파이프라인 실행"""
+        print("Starting repository crawling pipeline...")
+
+        try:
+            # 1. 레포지토리 클론
+            repo_path = self.clone_repository(repo_url)
+
+            # 2. 코드 파일 추출
+            file_paths = self.extract_code_files(repo_path)
+
+            # 3. 파일을 청크로 분할
+            documents = self.process_files_to_chunks(file_paths)
+
+            # 4. 벡터스토어 생성
+            self.create_vector_store(documents)
+
+        except Exception as e:
+            print(f"crawling failed: {e}")
+            sys.exit(1)
