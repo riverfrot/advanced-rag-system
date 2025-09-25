@@ -42,8 +42,6 @@ CHROMA_PERSIST_DIRECTORY=./chroma_db
   python main.py crawling --repo https://github.com/riverfrot/sample-spring --persist-dir ./custom_db
   python main.py query --issue "ISSUE-2: 데이터 영속성 문제" --persist-dir ./custom_db
 
-  ## Roadmap
-
 **TODO:**
 - [ ] Vector Database 성능 최적화 (Pinecone/Chroma)
 - [ ] Memory 관리 및 conversation chain 고도화
