@@ -1,5 +1,6 @@
-import dataclass
-from typing import List, Dict, datetime
+from dataclasses import dataclass
+from typing import List, Dict, Optional
+from datetime import datetime
 
 
 @dataclass
@@ -7,8 +8,8 @@ class RepositoryMetadata:
     url: str
     persist_dir: str = "./chroma_db"
     vector_db_type: str = "chroma"
-    last_crawled: datetime
-    file_count: int
-    chunk_count: int
-    supported_languages: List[str]
-    dependencies: Dict[str, str]
+    last_crawled: Optional[datetime] = None
+    file_count: Optional[int] = None
+    chunk_count: Optional[int] = None
+    supported_languages: Optional[List[str]] = None
+    dependecies: Optional[Dict[str, str]] = None
