@@ -2,7 +2,7 @@ from fastmcp import mcp_tool
 from services.repository_service import RepositoryService
 
 # 아래 내용은 추후 어느정도 프로젝트 다듬은뒤에 dtoclass로 변경 필요
-from domain.entities.repository import RepositoryMetadata
+from models.repository_model import RepositoryMetadata
 
 
 class RepositoryController:

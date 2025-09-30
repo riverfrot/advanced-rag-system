@@ -16,7 +16,7 @@ from datetime import datetime
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_openai.embeddings import OpenAIEmbeddings
-from domain.entities.repository import RepositoryMetadata
+from models.repository_model import RepositoryMetadata
 
 load_dotenv()
 
@@ -347,7 +347,9 @@ class RepositoryService:
             try:
                 with open(build_gradle_kts, "r") as f:
                     content = f.read()
-                    dependencies["gradle_kts"] = self._parse_gradle_dependencies(content)
+                    dependencies["gradle_kts"] = self._parse_gradle_dependencies(
+                        content
+                    )
             except Exception as e:
                 print(f"Error reading build.gradle.kts: {e}")
 
@@ -356,6 +358,7 @@ class RepositoryService:
         if os.path.exists(pom_xml):
             try:
                 import xml.etree.ElementTree as ET
+
                 tree = ET.parse(pom_xml)
                 root = tree.getroot()
                 dependencies["maven"] = self._parse_maven_dependencies(root)
@@ -367,13 +370,14 @@ class RepositoryService:
     def _parse_gradle_dependencies(self, content: str) -> dict:
         """Gradle 의존성 파싱"""
         import re
+
         dependencies = {
             "implementation": [],
             "testImplementation": [],
             "api": [],
             "compileOnly": [],
         }
-        
+
         # 의존성 패턴 매칭
         patterns = {
             "implementation": r"implementation\s+['\"]([^'\"]+)['\"]",
@@ -381,47 +385,44 @@ class RepositoryService:
             "api": r"api\s+['\"]([^'\"]+)['\"]",
             "compileOnly": r"compileOnly\s+['\"]([^'\"]+)['\"]",
         }
-        
+
         for dep_type, pattern in patterns.items():
             matches = re.findall(pattern, content)
             dependencies[dep_type] = matches
-        
+
         return dependencies
 
     def _parse_maven_dependencies(self, root) -> dict:
         """Maven pom.xml 의존성 파싱"""
-        dependencies = {
-            "dependencies": [],
-            "plugins": []
-        }
-        
+        dependencies = {"dependencies": [], "plugins": []}
+
         # XML 네임스페이스 처리
-        namespace = {'maven': 'http://maven.apache.org/POM/4.0.0'}
-        
+        namespace = {"maven": "http://maven.apache.org/POM/4.0.0"}
+
         # 의존성 추출
-        deps = root.findall('.//maven:dependency', namespace)
+        deps = root.findall(".//maven:dependency", namespace)
         for dep in deps:
-            group_id = dep.find('maven:groupId', namespace)
-            artifact_id = dep.find('maven:artifactId', namespace)
-            version = dep.find('maven:version', namespace)
-            
+            group_id = dep.find("maven:groupId", namespace)
+            artifact_id = dep.find("maven:artifactId", namespace)
+            version = dep.find("maven:version", namespace)
+
             if group_id is not None and artifact_id is not None:
                 dep_info = f"{group_id.text}:{artifact_id.text}"
                 if version is not None:
                     dep_info += f":{version.text}"
                 dependencies["dependencies"].append(dep_info)
-        
+
         # 플러그인 추출
-        plugins = root.findall('.//maven:plugin', namespace)
+        plugins = root.findall(".//maven:plugin", namespace)
         for plugin in plugins:
-            group_id = plugin.find('maven:groupId', namespace)
-            artifact_id = plugin.find('maven:artifactId', namespace)
-            version = plugin.find('maven:version', namespace)
-            
+            group_id = plugin.find("maven:groupId", namespace)
+            artifact_id = plugin.find("maven:artifactId", namespace)
+            version = plugin.find("maven:version", namespace)
+
             if group_id is not None and artifact_id is not None:
                 plugin_info = f"{group_id.text}:{artifact_id.text}"
                 if version is not None:
                     plugin_info += f":{version.text}"
                 dependencies["plugins"].append(plugin_info)
-        
+
         return dependencies
