@@ -42,13 +42,18 @@ CHROMA_PERSIST_DIRECTORY=./chroma_db
   python main.py crawling --repo https://github.com/riverfrot/sample-spring --persist-dir ./custom_db
   python main.py query --issue "ISSUE-2: 데이터 영속성 문제" --persist-dir ./custom_db
 
+
+### 4. 서버 구동 예시
+예시:
+  # MCP서버 8080포트로 구동
+  python main.py
+
 **TODO:**
-- [ ] Vector Database 성능 최적화 (Pinecone/Chroma)
-- [ ] Memory 관리 및 conversation chain 고도화
-- [ ] Error handling 및 retry 로직 추가
-- [ ] API 응답 시간 모니터링 추가
-- [ ] FastMCP를 사용하여 MCP 서버로 전환 예정
-- [ ] 멀티 에이전트 서비스들을 통해 해당 MCP서버를 tool로서 사용 가능하게끔 고도화
+- [ ] Vector Database 성능 최적화 (Pinecone/Chroma) #멀티에이전트 작업 후 추가 진행 예정 production에 배포 진행시
+- [v] Memory 관리 및 conversation chain 고도화 #작업 완료
+- [ ] API 응답 시간 모니터링 추가 #멀티에이전트 작업 후 추가 진행 예정 production에 배포 진행시
+- [v] FastMCP를 사용하여 MCP 서버로 전환 예정 #작업 완료
+- [ ] 멀티 에이전트 서비스들을 통해 해당 MCP서버를 tool로서 사용 가능하게끔 고도화 # 별도 repository에서 진행 예정
 
 ## 라이선스
 
