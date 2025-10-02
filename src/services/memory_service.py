@@ -1,7 +1,7 @@
 from typing import Optional, Dict, List
 import uuid
-from models.memory_models import Conversation, Interaction
-from infrastructure.memory.conversation_store import ConversationStore
+from ..models.memory_models import Conversation, Interaction
+from ..infrastructure.memory.conversation_store import ConversationStore
 
 
 class MemoryService:

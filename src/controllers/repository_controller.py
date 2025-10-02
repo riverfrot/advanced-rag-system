@@ -1,8 +1,7 @@
-from fastmcp import mcp_tool
-from services.repository_service import RepositoryService
+from ..services.repository_service import RepositoryService
 
 # 아래 내용은 추후 어느정도 프로젝트 다듬은뒤에 dtoclass로 변경 필요
-from models.repository_model import RepositoryMetadata
+from ..models.repository_model import RepositoryMetadata
 
 
 class RepositoryController:
@@ -11,10 +10,9 @@ class RepositoryController:
     추후 authorization 추가 필요 외부 인가 되지 않은 사용자가 접근 못하게 나머지 단순 조회가 아닌
         llm call또는 내부 private정보가 노출 되는 내용은 authorization 구성필요"""
 
-    def __init__(self):
-        self.repository_service = RepositoryService()
+    def __init__(self, repository_service: RepositoryService = None):
+        self.repository_service = repository_service or RepositoryService()
 
-    @mcp_tool()
     async def crawl_repository(
         self,
         repository_metadata: RepositoryMetadata,
@@ -35,7 +33,6 @@ class RepositoryController:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    @mcp_tool()
     async def analyze_repository_structure(
         self, repository_metadata: RepositoryMetadata
     ) -> dict:

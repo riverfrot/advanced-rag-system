@@ -16,7 +16,7 @@ from datetime import datetime
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_openai.embeddings import OpenAIEmbeddings
-from models.repository_model import RepositoryMetadata
+from ..models.repository_model import RepositoryMetadata
 
 load_dotenv()
 
@@ -169,7 +169,6 @@ class RepositoryService:
         """
         print(f"Creating vector store with {len(documents)} chunks...")
 
-        # 텍스트와 메타데이터 분리
         texts = [doc["content"] for doc in documents]
         metadatas = [doc["metadata"] for doc in documents]
 
@@ -185,6 +184,34 @@ class RepositoryService:
         # 벡터스토어 저장
         vectorstore.persist()
         print(f"Vector store created and saved to: {persist_directory}")
+
+    def load_vector_store(self, persist_dir: str):
+        """기존 벡터스토어 로드"""
+        persist_directory = persist_dir or self.chroma_persist_dir
+
+        vectorstore = Chroma(
+            persist_directory=persist_directory, embedding_function=self.embeddings
+        )
+
+        return vectorstore
+
+    def load_crawled_documents(self, persist_dir: str) -> List[Dict[str, Any]]:
+        """크롤링된 문서 로드 (sparse retriever용)"""
+        vectorstore = self.load_vector_store(persist_dir)
+
+        # ChromaDB에서 모든 문서 가져오기
+        collection = vectorstore._collection
+        all_docs = collection.get()
+
+        documents = []
+        for i, (doc_id, content, metadata) in enumerate(
+            zip(all_docs["ids"], all_docs["documents"], all_docs["metadatas"])
+        ):
+            documents.append(
+                {"id": doc_id, "content": content, "metadata": metadata or {}}
+            )
+
+        return documents
 
     async def create_crawl_repository(
         self, repository_metadata: RepositoryMetadata

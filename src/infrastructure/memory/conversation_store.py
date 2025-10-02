@@ -7,11 +7,11 @@ import json
 from typing import Optional, List
 from datetime import datetime
 from pathlib import Path
-from models.memory_models import Conversation, Interaction
+from ...models.memory_models import Conversation, Interaction
 
 
 class ConversationStore:
-    def __init__(self, db_path: str = "conversations.db"):
+    def __init__(self, db_path: str):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.init_database()

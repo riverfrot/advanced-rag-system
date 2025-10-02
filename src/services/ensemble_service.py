@@ -1,9 +1,9 @@
 import asyncio
 import time
 from typing import List, Dict, Any, Optional
-from models.search_models import SearchQuery, SearchResult, RetrievalWeights
-from infrastructure.retrievers.dense_retriever import DenseReriever
-from infrastructure.retrievers.sparse_retriever import SparseRetriever
+from ..models.search_models import SearchQuery, SearchResult, RetrievalWeights
+from ..infrastructure.retrievers.dense_retriever import DenseReriever
+from ..infrastructure.retrievers.sparse_retriever import SparseRetriever
 
 
 class EnsembleRetrievalService:

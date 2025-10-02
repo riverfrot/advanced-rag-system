@@ -1,15 +1,13 @@
-from fastmcp import mcp_tool
 from typing import Dict, Any, Optional
-from services.ensemble_service import EnsembleRetrievalService
-from models.search_models import SearchQuery, RetrievalWeights
+from ..services.ensemble_service import EnsembleRetrievalService
+from ..models.search_models import SearchQuery, RetrievalWeights
 
 
-class RetrievalController:
+class EnsembleRetrievalController:
 
     def __init__(self, ensemble_retrieval_service: EnsembleRetrievalService):
         self.ensemble_retrieval_service = ensemble_retrieval_service
 
-    @mcp_tool()
     async def ensemble_search(
         self,
         query: str,
@@ -28,7 +26,6 @@ class RetrievalController:
         result = await self.ensemble_retrieval_service.search(search_query, k, weights)
         return result.to_dict()
 
-    @mcp_tool()
     async def adaptive_search(
         self, query: str, k: int = 5, conversation_id: Optional[str] = None
     ) -> Dict[str, Any]:
