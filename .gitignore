@@ -10,3 +10,7 @@ __pycache__/
 #작업중 발생한 폴더들
 custom_db/
 temp_repo/
+chroma_db/
+
+#작업중 발생한 파일들
+conversations.db
